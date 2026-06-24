@@ -31,6 +31,7 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -257,43 +258,59 @@ fun ReminderDialog(
     var title by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                "یادآور جدید",
-                style = MaterialTheme.typography.titleLarge
-            )
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = { title = it },
-                    label = { Text("عنوان") },
-                    singleLine = true,
+    CompositionLocalProvider(
+        LocalLayoutDirection provides LayoutDirection.Rtl
+    ) {
+
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = {
+                Text(
+                    text = "یادآور جدید",
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Right,
                     modifier = Modifier.fillMaxWidth()
                 )
-                OutlinedTextField(
-                    value = note,
-                    onValueChange = { note = it },
-                    label = { Text("توضیحات") },
+            },
+            text = {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxWidth()
-                )
+                ) {
+
+                    OutlinedTextField(
+                        value = title,
+                        onValueChange = { title = it },
+                        label = { Text("عنوان") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Right)
+                    )
+
+                    OutlinedTextField(
+                        value = note,
+                        onValueChange = { note = it },
+                        label = { Text("توضیحات") },
+                        modifier = Modifier.fillMaxWidth(),
+                        textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Right)
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    enabled = title.isNotBlank(),
+                    onClick = {
+                        onSave(title, note)
+                    }
+                ) {
+                    Text("ذخیره")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text("لغو")
+                }
             }
-        },
-        confirmButton = {
-            Button(
-                enabled = title.isNotBlank(),
-                onClick = { onSave(title, note) }
-            ) {
-                Text("ذخیره")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("لغو")
-            }
-        }
-    )
+        )
+    }
 }
